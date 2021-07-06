@@ -2,7 +2,7 @@
 
 ## Description
 
-Automatically importing data into systems from files is quite a common process but getting it to run smoothly is not always trivial especially if we have inconsistent data, complex validation rules, enrichment data that goes out of date, systems that go down etc.
+Automatically importing data into systems from files is quite a common process but getting it to run smoothly is not always trivial especially if we have inconsistent data, complex validation rules, enrichment data that goes out of date, systems that go down, etc.
 
 This project is a generic file import process implemented with workflow engine Camunda and low-code platform Linx. Camunda runs the workflow and Linx does the file parsing, data validation and other technical bits. Linx communicates with Camunda through Camunda's REST API. 
 
@@ -70,7 +70,7 @@ If the process needs to change:
 
 Items not implemented:
 1. UI. There is no UI for user tasks. We can use the tasklist provided by Camunda (http://localhost:8080/camunda/app/ in the default installation) or build our own. This project has two endpoints under *API* in the *UI* folder in Linx to show how we can access Camunda to build our own UI.
-1. Tests that confirms the accuracy of the resultant data. The current tests only tests the process.
+1. Tests that confirm the accuracy of the resultant data. The current tests only test the process.
 1. Logging. 
 
 ## Production
