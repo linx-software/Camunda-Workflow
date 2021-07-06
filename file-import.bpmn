@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0ayvu7e" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.8.1" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.15.0">
+  <bpmn:process id="file-import" name="file-import" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_0rol4d4</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="Gateway_03cqjxi" name="Is data valid?">
+      <bpmn:incoming>Flow_1q31pxy</bpmn:incoming>
+      <bpmn:outgoing>Flow_1iarrc4</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1aetcrg</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_1q31pxy" sourceRef="validate-data" targetRef="Gateway_03cqjxi" />
+    <bpmn:sequenceFlow id="Flow_0rol4d4" sourceRef="StartEvent_1" targetRef="import" />
+    <bpmn:serviceTask id="import" name="Import" camunda:type="external" camunda:topic="import">
+      <bpmn:incoming>Flow_0rol4d4</bpmn:incoming>
+      <bpmn:outgoing>Flow_1gevhau</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1gevhau" sourceRef="import" targetRef="enrich-data" />
+    <bpmn:serviceTask id="enrich-data" name="EnrichData" camunda:type="external" camunda:topic="enrich-data">
+      <bpmn:incoming>Flow_1gevhau</bpmn:incoming>
+      <bpmn:incoming>Flow_0gwq24o</bpmn:incoming>
+      <bpmn:outgoing>Flow_0vmkcxm</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0vmkcxm" sourceRef="enrich-data" targetRef="validate-data" />
+    <bpmn:sequenceFlow id="Flow_1iarrc4" name="yes" sourceRef="Gateway_03cqjxi" targetRef="update-target">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${IsDataValid==true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="update-target" name="UpdateTarget" camunda:type="external" camunda:topic="update-target">
+      <bpmn:incoming>Flow_1iarrc4</bpmn:incoming>
+      <bpmn:outgoing>Flow_02sowv2</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="Event_1wu51sn" name="Completed">
+      <bpmn:incoming>Flow_02sowv2</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_02sowv2" sourceRef="update-target" targetRef="Event_1wu51sn" />
+    <bpmn:sequenceFlow id="Flow_1aetcrg" name="no" sourceRef="Gateway_03cqjxi" targetRef="fix-data">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${IsDataValid==false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:userTask id="fix-data" name="FixData">
+      <bpmn:incoming>Flow_1aetcrg</bpmn:incoming>
+      <bpmn:outgoing>Flow_06psms7</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_07p7fn0" name="Try again?">
+      <bpmn:incoming>Flow_06psms7</bpmn:incoming>
+      <bpmn:outgoing>Flow_0gwq24o</bpmn:outgoing>
+      <bpmn:outgoing>Flow_12vimen</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_06psms7" sourceRef="fix-data" targetRef="Gateway_07p7fn0" />
+    <bpmn:sequenceFlow id="Flow_0gwq24o" name="yes" sourceRef="Gateway_07p7fn0" targetRef="enrich-data">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${TryAgain==true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:boundaryEvent id="import-error" name="ImportError" attachedToRef="import">
+      <bpmn:outgoing>Flow_1divgrd</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_0a88v6i" camunda:errorMessageVariable="ErrorReason" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_1divgrd" sourceRef="import-error" targetRef="stop-import" />
+    <bpmn:sequenceFlow id="Flow_12vimen" name="no" sourceRef="Gateway_07p7fn0" targetRef="stop-import">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${TryAgain==false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="validate-data" name="ValidateData" camunda:type="external" camunda:topic="validate-data">
+      <bpmn:incoming>Flow_0vmkcxm</bpmn:incoming>
+      <bpmn:outgoing>Flow_1q31pxy</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="Event_0wlvulj" name="Stopped">
+      <bpmn:incoming>Flow_0skco3g</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="stop-import" name="StopImport" camunda:type="external" camunda:topic="stop-import">
+      <bpmn:incoming>Flow_12vimen</bpmn:incoming>
+      <bpmn:incoming>Flow_1divgrd</bpmn:incoming>
+      <bpmn:outgoing>Flow_0skco3g</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0skco3g" sourceRef="stop-import" targetRef="Event_0wlvulj" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="file-import">
+      <bpmndi:BPMNEdge id="Flow_0skco3g_di" bpmnElement="Flow_0skco3g">
+        <di:waypoint x="510" y="350" />
+        <di:waypoint x="982" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12vimen_di" bpmnElement="Flow_12vimen">
+        <di:waypoint x="460" y="265" />
+        <di:waypoint x="460" y="310" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="445" y="276" width="13" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1divgrd_di" bpmnElement="Flow_1divgrd">
+        <di:waypoint x="310" y="185" />
+        <di:waypoint x="310" y="350" />
+        <di:waypoint x="410" y="350" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0gwq24o_di" bpmnElement="Flow_0gwq24o">
+        <di:waypoint x="460" y="215" />
+        <di:waypoint x="460" y="167" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="461" y="183" width="17" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06psms7_di" bpmnElement="Flow_06psms7">
+        <di:waypoint x="690" y="240" />
+        <di:waypoint x="485" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1aetcrg_di" bpmnElement="Flow_1aetcrg">
+        <di:waypoint x="740" y="152" />
+        <di:waypoint x="740" y="200" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="749" y="173" width="13" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02sowv2_di" bpmnElement="Flow_02sowv2">
+        <di:waypoint x="920" y="127" />
+        <di:waypoint x="982" y="127" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1iarrc4_di" bpmnElement="Flow_1iarrc4">
+        <di:waypoint x="765" y="127" />
+        <di:waypoint x="820" y="127" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="784" y="109" width="17" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0vmkcxm_di" bpmnElement="Flow_0vmkcxm">
+        <di:waypoint x="510" y="127" />
+        <di:waypoint x="560" y="127" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1gevhau_di" bpmnElement="Flow_1gevhau">
+        <di:waypoint x="360" y="127" />
+        <di:waypoint x="410" y="127" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0rol4d4_di" bpmnElement="Flow_0rol4d4">
+        <di:waypoint x="215" y="127" />
+        <di:waypoint x="260" y="127" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1q31pxy_di" bpmnElement="Flow_1q31pxy">
+        <di:waypoint x="660" y="127" />
+        <di:waypoint x="715" y="127" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="179" y="109" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_03cqjxi_di" bpmnElement="Gateway_03cqjxi" isMarkerVisible="true">
+        <dc:Bounds x="715" y="102" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="707" y="78" width="65" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1tcv6qn_di" bpmnElement="import">
+        <dc:Bounds x="260" y="87" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0n28cza_di" bpmnElement="enrich-data">
+        <dc:Bounds x="410" y="87" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0ed9nwh_di" bpmnElement="update-target">
+        <dc:Bounds x="820" y="87" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1wu51sn_di" bpmnElement="Event_1wu51sn">
+        <dc:Bounds x="982" y="109" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="974" y="152" width="54" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1yzfahu_di" bpmnElement="fix-data">
+        <dc:Bounds x="690" y="200" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_07p7fn0_di" bpmnElement="Gateway_07p7fn0" isMarkerVisible="true">
+        <dc:Bounds x="435" y="215" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="373.5" y="233" width="51" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1qlzg5h_di" bpmnElement="validate-data">
+        <dc:Bounds x="560" y="87" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0rijdve_di" bpmnElement="Event_0wlvulj">
+        <dc:Bounds x="982" y="332" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="979" y="308" width="41" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0fsjfx8_di" bpmnElement="stop-import">
+        <dc:Bounds x="410" y="310" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0qyhm10_di" bpmnElement="import-error">
+        <dc:Bounds x="292" y="149" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="282" y="192" width="57" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
