@@ -4,7 +4,7 @@
 
 Automatically importing data into systems from files is quite a common process but getting it to run smoothly is not always trivial especially if we have inconsistent data, complex validation rules, enrichment data that goes out of date, systems that go down, etc.
 
-This project is a generic file import process implemented with workflow engine Camunda and low-code platform Linx. Camunda runs the workflow and Linx does the file parsing, data validation and other technical bits. Linx communicates with Camunda through Camunda's REST API. 
+This project is a generic file import process implemented with workflow engine Camunda and low-code platform Linx. Camunda runs the workflow and Linx does the file parsing, data validation and other bits usually accomplished by writing code. Linx communicates with Camunda through Camunda's REST API. 
 
 Business process:
 
