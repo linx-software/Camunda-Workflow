@@ -81,4 +81,4 @@ All questions and suggestions are welcome. Please ask the [Linx community](https
 
 ## License
 
-[MIT](https://github.com/gawie-yssel/file-import-process/blob/main/LICENSE.txt)
+[MIT](https://github.com/linx-software/file-import-process/blob/master/LICENSE.txt)
