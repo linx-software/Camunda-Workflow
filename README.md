@@ -16,6 +16,8 @@ Architecture:
 
 A workflow instance is created for every file received. Camunda keeps the state of the workflow instance while Linx executes all the automated tasks. The file is the unit of work so all tasks execute on data related to the file.
 
+For more on how the Linx solution works see the [wiki](https://github.com/linx-software/file-import-process/wiki)
+
 ## Installation
 
 1. Install Camunda by following [these](https://docs.camunda.org/manual/latest/installation/) instructions. The easiest way is to use Docker. If you have Docker just run 
